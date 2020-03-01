@@ -82,7 +82,7 @@ AgentBrain.prototype.move = function (direction) {
     });
     //console.log(moved);
     if (moved) {
-        this.addRandomTile();
+        //this.addRandomTile();
     }
     return moved;
 };
