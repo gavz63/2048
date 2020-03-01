@@ -175,19 +175,23 @@ Agent.prototype.expectimax = function(brain) {
     }
     if (anyMoves) return this.evaluateGrid(brain);
 
+    let optimum = 0;
     for (let i = 0; i < moves.length; i++) {
         if (moves[i]) {
+            // Make the move
             brain.move(i);
+            let val = 0;
+            // For every available cell, evaluate the utility of the
             let availableCells = brain.grid.availableCells();
             let numAvailCells = availableCells.length;
             for (let i = 0; i < numAvailCells; i++) {
                 brain.grid.insertTile(availableCells[i]);
-                this.expectimax(brain);
+                val += this.expectimax(brain) / numAvailCells;
                 brain.reset();
             }
-
+            optimum = Math.max(optimum, val);
         }
     }
 
-
+    return optimum;
 };
