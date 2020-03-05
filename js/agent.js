@@ -141,6 +141,7 @@ function Agent() {
 
 Agent.prototype.selectMove = function (gameManager) {
     var brain = new AgentBrain(gameManager);
+    brain.score = gameManager.score;
 
     // Use the brain to simulate moves
     // brain.move(i)
@@ -152,6 +153,7 @@ Agent.prototype.selectMove = function (gameManager) {
     for (let i = 0; i < moves.length; i ++) {
         let brainCpy = new AgentBrain(brain);
         brainCpy.depth = 0;
+        brainCpy.score = brain.score;
         if (brainCpy.move(i)) {
             moves[i] = this.expectimax(brainCpy);
         }
@@ -162,9 +164,86 @@ Agent.prototype.selectMove = function (gameManager) {
 
 Agent.prototype.evaluateGrid = function (gameManager) {
     // calculate a score for the current grid configuration
+    // 0: top-right, 1: top-left, 2: bottom-right, 3: bottom-left
+    let sumArr = [0, 0, 0, 0];
 
+    for (let i = 0; i < gameManager.grid.cells.length; i++) {
+        for (let j = 0; j < gameManager.grid.cells[i].length; j++) {
+            let tileVal = gameManager.grid.cells[i][j];
 
-    return 1;
+            if (tileVal != null) {
+                tileVal = tileVal.value;
+                let tr = 0;
+                let tl = 0;
+                let br = 0;
+                let bl = 0;
+
+                // 1s
+                if (i === 0) {
+                    br = 1;
+                    bl = 1;
+                } else if ( i === 3) {
+                    tr = 1;
+                    tl = 1;
+                }
+                if (j === 0) {
+                    tr = 1;
+                    br = 1;
+                } else if (j === 3) {
+                    tl = 1;
+                    br = 1;
+                }
+
+                // 10s
+                if (i === 3 && j === 0) {
+                    bl = 10;
+                } else if (i === 0 && j === 0) {
+                    tl = 10;
+                } else if (i === 3 &&  j === 3) {
+                    br = 10;
+                } else if (i === 0 && j === 3) {
+                    tr = 10;
+                }
+
+                //2s
+                if ((i === 1 && j !== 3) || (i !== 0 && j === 2)) {
+                    bl = 2;
+                }
+                if ((i === 2 && j !== 3) || (j === 2 && i !== 3)) {
+                    tl = 2;
+                }
+                if ((i === 2 && j !== 0) || (j === 1 && i !== 3)) {
+                    tr = 2;
+                }
+                if ((i === 1 && j !== 0) || (j === 1 && i !== 0)) {
+                    br = 2;
+                }
+
+                // 5s
+                if ((i === 2 && (j === 0 || j === 1)) || (i === 3 && j === 1)) {
+                    bl = 5;
+                }
+                if ((i === 1 && (j === 0 || j === 1)) || (i === 0 && j === 1)) {
+                    tl = 5;
+                }
+                if ((i === 1 && (j === 2 || j === 3)) || (i === 0 && j === 2)) {
+                    tr = 5;
+                }
+                if ((i === 2 && (j === 2 || j === 3)) || (i === 3 && j === 2)) {
+                    br = 5;
+                }
+
+                sumArr[0] += Math.log2(tileVal) * tr;
+                sumArr[1] += Math.log2(tileVal) * tl;
+                sumArr[2] += Math.log2(tileVal) * br;
+                sumArr[3] += Math.log2(tileVal) * bl;
+            }
+        }
+    }
+
+    return Math.max(...sumArr) +
+        gameManager.score +
+        gameManager.grid.availableCells().length;// +
 };
 
 Agent.prototype.expectimax = function(brain) {
@@ -183,6 +262,7 @@ Agent.prototype.expectimax = function(brain) {
             // Make the move
             let brainCpy = new AgentBrain(brain);
             brainCpy.depth = brain.depth + 1;
+            brainCpy.score = brain.score;
             brainCpy.move(i);
             let val = 0;
             /* For every available cell, evaluate the utility and
@@ -193,6 +273,7 @@ Agent.prototype.expectimax = function(brain) {
                 brainCpy.grid.insertTile(new Tile(availableCells[i], 2));
                 val += this.expectimax(brainCpy) / numAvailCells;
                 brainCpy.reset();
+                brainCpy.score = brain.score;
             }
             optimum = Math.max(optimum, val);
         }
