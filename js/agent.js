@@ -164,8 +164,8 @@ Agent.prototype.selectMove = function (gameManager) {
 
 Agent.prototype.evaluateGrid = function (gameManager) {
     // calculate a score for the current grid configuration
-    // 0: top-right, 1: top-left, 2: bottom-right, 3: bottom-left
-    let sumArr = [0, 0, 0, 0];
+    // 0: top-right, 1: top-left, 2: bottom-right, 3: bottom-left, 4: snake
+    let sumArr = [0, 0, 0, 0, 0];
 
     for (let i = 0; i < gameManager.grid.cells.length; i++) {
         for (let j = 0; j < gameManager.grid.cells[i].length; j++) {
@@ -177,73 +177,117 @@ Agent.prototype.evaluateGrid = function (gameManager) {
                 let tl = 0;
                 let br = 0;
                 let bl = 0;
+                let w = 0;
 
-                // 1s
+            //     // 1s
+            //     if (i === 0) {
+            //         br = 1;
+            //         bl = 1;
+            //     } else if ( i === 3) {
+            //         tr = 1;
+            //         tl = 1;
+            //     }
+            //     if (j === 0) {
+            //         tr = 1;
+            //         br = 1;
+            //     } else if (j === 3) {
+            //         tl = 1;
+            //         br = 1;
+            //     }
+            //
+            //     // 10s
+            //     if (i === 3 && j === 0) {
+            //         bl = 20;
+            //     } else if (i === 0 && j === 0) {
+            //         tl = 20;
+            //     } else if (i === 3 &&  j === 3) {
+            //         br = 20;
+            //     } else if (i === 0 && j === 3) {
+            //         tr = 20;
+            //     }
+            //
+            //     //2s
+            //     if ((i === 1 && j !== 3) || (i !== 0 && j === 2)) {
+            //         bl = 2;
+            //     }
+            //     if ((i === 2 && j !== 3) || (j === 2 && i !== 3)) {
+            //         tl = 2;
+            //     }
+            //     if ((i === 2 && j !== 0) || (j === 1 && i !== 3)) {
+            //         tr = 2;
+            //     }
+            //     if ((i === 1 && j !== 0) || (j === 1 && i !== 0)) {
+            //         br = 2;
+            //     }
+            //
+            //     // 5s
+            //     if ((i === 2 && (j === 0 || j === 1)) || (i === 3 && j === 1)) {
+            //         bl = 5;
+            //     }
+            //     if ((i === 1 && (j === 0 || j === 1)) || (i === 0 && j === 1)) {
+            //         tl = 5;
+            //     }
+            //     if ((i === 1 && (j === 2 || j === 3)) || (i === 0 && j === 2)) {
+            //         tr = 5;
+            //     }
+            //     if ((i === 2 && (j === 2 || j === 3)) || (i === 3 && j === 2)) {
+            //         br = 5;
+            //     }
+
                 if (i === 0) {
-                    br = 1;
-                    bl = 1;
-                } else if ( i === 3) {
-                    tr = 1;
-                    tl = 1;
-                }
-                if (j === 0) {
-                    tr = 1;
-                    br = 1;
-                } else if (j === 3) {
-                    tl = 1;
-                    br = 1;
-                }
-
-                // 10s
-                if (i === 3 && j === 0) {
-                    bl = 10;
-                } else if (i === 0 && j === 0) {
-                    tl = 10;
-                } else if (i === 3 &&  j === 3) {
-                    br = 10;
-                } else if (i === 0 && j === 3) {
-                    tr = 10;
-                }
-
-                //2s
-                if ((i === 1 && j !== 3) || (i !== 0 && j === 2)) {
-                    bl = 2;
-                }
-                if ((i === 2 && j !== 3) || (j === 2 && i !== 3)) {
-                    tl = 2;
-                }
-                if ((i === 2 && j !== 0) || (j === 1 && i !== 3)) {
-                    tr = 2;
-                }
-                if ((i === 1 && j !== 0) || (j === 1 && i !== 0)) {
-                    br = 2;
-                }
-
-                // 5s
-                if ((i === 2 && (j === 0 || j === 1)) || (i === 3 && j === 1)) {
-                    bl = 5;
-                }
-                if ((i === 1 && (j === 0 || j === 1)) || (i === 0 && j === 1)) {
-                    tl = 5;
-                }
-                if ((i === 1 && (j === 2 || j === 3)) || (i === 0 && j === 2)) {
-                    tr = 5;
-                }
-                if ((i === 2 && (j === 2 || j === 3)) || (i === 3 && j === 2)) {
-                    br = 5;
+                    if (j === 0) {
+                        w = 32768;
+                    } else if (j === 1) {
+                        w = 16384;
+                    } else if (j === 2) {
+                        w = 8192;
+                    } else {
+                        w = 4096;
+                    }
+                } else if (i === 1) {
+                    if (j === 0) {
+                        w = 256;
+                    } else if (j === 1) {
+                        w = 512;
+                    } else if (j === 2) {
+                        w = 1024;
+                    } else {
+                        w = 2048;
+                    }
+                } else if (i === 2) {
+                    if (j === 0) {
+                        w = 128;
+                    } else if (j === 1) {
+                        w = 64;
+                    } else if (j === 2) {
+                        w = 32;
+                    } else {
+                        w = 16;
+                    }
+                } else if (i === 3) {
+                    if (j === 0) {
+                        w = 2;
+                    } else if (j === 1) {
+                        w = 2;
+                    } else if (j === 2) {
+                        w = 4;
+                    } else {
+                        w = 8;
+                    }
                 }
 
                 sumArr[0] += Math.log2(tileVal) * tr;
                 sumArr[1] += Math.log2(tileVal) * tl;
                 sumArr[2] += Math.log2(tileVal) * br;
                 sumArr[3] += Math.log2(tileVal) * bl;
+                sumArr[4] += Math.log2(tileVal) * w;
             }
         }
     }
 
     return Math.max(...sumArr) +
         gameManager.score +
-        gameManager.grid.availableCells().length;// +
+        (gameManager.grid.availableCells().length * 32768);
 };
 
 Agent.prototype.expectimax = function(brain) {
@@ -254,7 +298,7 @@ Agent.prototype.expectimax = function(brain) {
         moves.push(cpy.move(i));
         if (moves[i]) anyMoves = true;
     }
-    if (!anyMoves || brain.depth > 2) return this.evaluateGrid(brain);
+    if (!anyMoves || brain.depth > 1) return this.evaluateGrid(brain);
 
     let optimum = 0;
     for (let i = 0; i < moves.length; i++) {
