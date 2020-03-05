@@ -137,22 +137,23 @@ AgentBrain.prototype.positionsEqual = function (first, second) {
 };
 
 function Agent() {
-}
+};
 
 Agent.prototype.selectMove = function (gameManager) {
     var brain = new AgentBrain(gameManager);
 
     // Use the brain to simulate moves
-    // brain.move(i) 
+    // brain.move(i)
     // i = 0: up, 1: right, 2: down, 3: left
     // brain.reset() resets the brain to the current game board
 
     let moves = [0, 0, 0, 0];
 
     for (let i = 0; i < moves.length; i ++) {
-        if (brain.move(i)) {
-            moves[i] = this.expectimax(brain);
-            brain.reset();
+        let brainCpy = new AgentBrain(brain);
+        brainCpy.depth = 0;
+        if (brainCpy.move(i)) {
+            moves[i] = this.expectimax(brainCpy);
         }
     }
 
@@ -161,33 +162,37 @@ Agent.prototype.selectMove = function (gameManager) {
 
 Agent.prototype.evaluateGrid = function (gameManager) {
     // calculate a score for the current grid configuration
+
+
     return 1;
 };
 
 Agent.prototype.expectimax = function(brain) {
-
     let anyMoves = false;
     let moves = [];
-    for (let i = 0; i < 4; i ++) {
-        moves.push(brain.move(i));
+    for (let i = 0; i < 4; i++) {
+        let cpy = new AgentBrain(brain);
+        moves.push(cpy.move(i));
         if (moves[i]) anyMoves = true;
-        brain.reset();
     }
-    if (anyMoves) return this.evaluateGrid(brain);
+    if (!anyMoves || brain.depth > 2) return this.evaluateGrid(brain);
 
     let optimum = 0;
     for (let i = 0; i < moves.length; i++) {
         if (moves[i]) {
             // Make the move
-            brain.move(i);
+            let brainCpy = new AgentBrain(brain);
+            brainCpy.depth = brain.depth + 1;
+            brainCpy.move(i);
             let val = 0;
-            // For every available cell, evaluate the utility of the
+            /* For every available cell, evaluate the utility and
+            calulate weighted sum.             */
             let availableCells = brain.grid.availableCells();
             let numAvailCells = availableCells.length;
             for (let i = 0; i < numAvailCells; i++) {
-                brain.grid.insertTile(availableCells[i]);
-                val += this.expectimax(brain) / numAvailCells;
-                brain.reset();
+                brainCpy.grid.insertTile(new Tile(availableCells[i], 2));
+                val += this.expectimax(brainCpy) / numAvailCells;
+                brainCpy.reset();
             }
             optimum = Math.max(optimum, val);
         }
@@ -195,3 +200,22 @@ Agent.prototype.expectimax = function(brain) {
 
     return optimum;
 };
+
+// Agent.prototype.selectMove = function (gameManager) {
+//     var brain = new AgentBrain(gameManager);
+//
+//     // Use the brain to simulate moves
+//     // brain.move(i)
+//     // i = 0: up, 1: right, 2: down, 3: left
+//     // brain.reset() resets the brain to the current game board
+//
+//     if (brain.move(0)) return 0;
+//     if (brain.move(1)) return 1;
+//     if (brain.move(3)) return 3;
+//     if (brain.move(2)) return 2;
+// };
+//
+// Agent.prototype.evaluateGrid = function (gameManager) {
+//     // calculate a score for the current grid configuration
+//
+// };
